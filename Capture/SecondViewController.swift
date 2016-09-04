@@ -44,6 +44,7 @@ class SecondViewController: UIViewController, UIImagePickerControllerDelegate, U
         }
         
     }
+
     
     func setUpCamera() throws -> Bool{
     
@@ -72,20 +73,59 @@ class SecondViewController: UIViewController, UIImagePickerControllerDelegate, U
             captureSession?.startRunning()
                 
             
-            return true;
+            return true
             
         }
-        return false;
+        return false
 
     }
-    /*
-    // MARK: - Navigation
+    
+    @IBOutlet var tempImageView: UIImageView!
+    var didTakePhoto : Bool = false
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    func didPressTakePhoto(){
+        
+        if let videoConnection = self.stillImageOuput?.connectionWithMediaType(AVMediaTypeVideo){
+            videoConnection.videoOrientation = AVCaptureVideoOrientation.Portrait
+            self.stillImageOuput?.captureStillImageAsynchronouslyFromConnection(videoConnection, completionHandler: {
+                (sampleBuffer, error) in
+                
+                if sampleBuffer != nil {
+                    
+                    
+                    var imageData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(sampleBuffer)
+                    var dataProvider  = CGDataProviderCreateWithCFData(imageData)
+                    var cgImageRef = CGImageCreateWithJPEGDataProvider(dataProvider, nil, true, .RenderingIntentDefault)
+                    
+                    var image = UIImage(CGImage: cgImageRef!, scale: 1.0, orientation: UIImageOrientation.Right)
+                    
+                    self.tempImageView.image = image
+                    self.tempImageView.hidden = false
+                    
+                }
+                
+            })
+        }
     }
-    */
+    
+    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        didPressTakeAntoher()
+    }
+    
+    func didPressTakeAntoher(){
+        
+        if didTakePhoto == true{
+            self.tempImageView.hidden = true
+            didTakePhoto = false
+            
+        }else{
+            captureSession!.startRunning()
+            didTakePhoto = true
+            didPressTakePhoto()
+            
+        }
+        
+    }
+
 
 }
